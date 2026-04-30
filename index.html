@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EconomStock — Dashboard Konten 30 Hari</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --es-gold: #C9A84C;
+  --es-gold-soft: rgba(201,168,76,0.12);
+  --es-gold-mid: rgba(201,168,76,0.3);
+  --hook: #E87040;
+  --hook-soft: rgba(232,112,64,0.12);
+  --value: #3D8FD4;
+  --value-soft: rgba(61,143,212,0.12);
+  --trust: #4DB88A;
+  --trust-soft: rgba(77,184,138,0.12);
+  --closing: #9B7FD4;
+  --closing-soft: rgba(155,127,212,0.12);
+  --surface: #ffffff;
+  --surface2: #f7f6f3;
+  --surface3: #f0efe9;
+  --border: rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.18);
+  --text: #1a1a18;
+  --muted: #6b6b66;
+  --hint: #9b9b94;
+  --font: 'DM Sans', system-ui, sans-serif;
+  --mono: 'DM Mono', 'Courier New', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1c1c1a;
+    --surface2: #242422;
+    --surface3: #2c2c28;
+    --border: rgba(255,255,255,0.1);
+    --border2: rgba(255,255,255,0.18);
+    --text: #e8e8e0;
+    --muted: #9b9b92;
+    --hint: #6b6b62;
+  }
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font);
+  background: var(--surface2);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ── App shell ── */
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--surface);
+  min-height: 100vh;
+  border-left: 0.5px solid var(--border);
+  border-right: 0.5px solid var(--border);
+}
+
+/* ── Header ── */
+.es-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 100;
+  flex-wrap: wrap;
+}
+.es-logo {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: var(--es-gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: #1a1500; flex-shrink: 0;
+}
+.es-header-text h1 { font-size: 15px; font-weight: 500; letter-spacing: -0.01em; }
+.es-header-text p { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+.tab-bar {
+  display: flex; gap: 3px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.tab {
+  font-family: var(--font); font-size: 12px; font-weight: 500;
+  padding: 5px 12px; border-radius: 6px;
+  border: 0.5px solid var(--border);
+  background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .15s;
+}
+.tab.active { background: var(--es-gold); border-color: var(--es-gold); color: #1a1500; }
+.tab:not(.active):hover { background: var(--surface2); color: var(--text); }
+
+/* ── Sections ── */
+.section { display: none; }
+.section.visible { display: block; }
+
+/* ── Flow strip ── */
+.flow-strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 1rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+  overflow-x: auto;
+  background: var(--surface);
+}
+.flow-node {
+  display: flex; flex-direction: column;
+  align-items: center; min-width: 130px; flex-shrink: 0;
+}
+.fn-time { font-size: 10px; font-family: var(--mono); color: var(--hint); margin-bottom: 4px; }
+.fn-box {
+  padding: 10px 16px; border-radius: 8px;
+  border: 0.5px solid; text-align: center; width: 118px;
+}
+.fn-name { font-size: 12px; font-weight: 500; }
+.fn-sub { font-size: 10px; margin-top: 2px; opacity: .75; }
+.fn-hook .fn-box { background: var(--hook-soft); border-color: var(--hook); }
+.fn-hook .fn-name { color: var(--hook); }
+.fn-hook .fn-sub { color: var(--hook); }
+.fn-value .fn-box { background: var(--value-soft); border-color: var(--value); }
+.fn-value .fn-name { color: var(--value); }
+.fn-value .fn-sub { color: var(--value); }
+.fn-trust .fn-box { background: var(--trust-soft); border-color: var(--trust); }
+.fn-trust .fn-name { color: var(--trust); }
+.fn-trust .fn-sub { color: var(--trust); }
+.fn-closing .fn-box { background: var(--closing-soft); border-color: var(--closing); }
+.fn-closing .fn-name { color: var(--closing); }
+.fn-closing .fn-sub { color: var(--closing); }
+.flow-arrow { font-size: 14px; color: var(--hint); padding: 0 6px; margin-top: 18px; flex-shrink: 0; }
+
+/* ── Today 4-slot grid ── */
+.today-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: var(--border);
+}
+@media (max-width: 700px) {
+  .today-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 460px) {
+  .today-grid { grid-template-columns: 1fr; }
+}
+
+.slot-card {
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+  position: relative;
+  overflow: hidden;
+}
+.slot-accent {
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 100%;
+}
+.slot-accent.hook { background: var(--hook); }
+.slot-accent.value { background: var(--value); }
+.slot-accent.trust { background: var(--trust); }
+.slot-accent.closing { background: var(--closing); }
+
+.slot-time { font-size: 10px; font-family: var(--mono); color: var(--hint); margin-bottom: 4px; }
+.slot-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 10px; margin-bottom: 6px;
+}
+.slot-label.hook { background: var(--hook-soft); color: var(--hook); }
+.slot-label.value { background: var(--value-soft); color: var(--value); }
+.slot-label.trust { background: var(--trust-soft); color: var(--trust); }
+.slot-label.closing { background: var(--closing-soft); color: var(--closing); }
+
+.stock-pill {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  padding: 2px 7px; border-radius: 5px;
+  background: var(--es-gold-soft); color: var(--es-gold);
+  border: 0.5px solid var(--es-gold-mid); margin-bottom: 5px;
+}
+.slot-card h3 { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.slot-copy { font-size: 11px; color: var(--muted); line-height: 1.55; margin-bottom: 10px; }
+
+.btn-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 5px; }
+.pi-btn {
+  font-family: var(--font); font-size: 10px;
+  padding: 3px 7px; border-radius: 4px;
+  border: 0.5px solid var(--border);
+  background: transparent; color: var(--muted);
+  cursor: pointer; white-space: nowrap; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 3px;
+  transition: all .12s;
+}
+.pi-btn:hover { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+.pi-btn.tool { border-color: var(--es-gold-mid); color: var(--es-gold); background: var(--es-gold-soft); }
+.pi-btn.tool:hover { background: var(--es-gold); color: #1a1500; }
+.pi-btn.ai { border-color: rgba(61,143,212,0.25); color: var(--value); background: var(--value-soft); }
+.pi-btn.ai:hover { background: var(--value); color: #fff; }
+.pi-btn.plat { font-size: 10px; }
+
+.status-btn {
+  font-family: var(--mono); font-size: 10px;
+  padding: 3px 8px; border-radius: 4px;
+  border: 0.5px solid var(--border);
+  background: transparent; color: var(--muted);
+  cursor: pointer; transition: all .12s; margin-left: auto;
+}
+.status-btn.done { background: var(--trust-soft); color: var(--trust); border-color: transparent; }
+
+/* ── Day selector ── */
+.day-selector {
+  padding: 0.75rem 1.5rem;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 0.5px solid var(--border);
+  flex-wrap: wrap;
+}
+.day-selector label { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.day-selector input[type=range] {
+  flex: 1; min-width: 140px; max-width: 300px;
+  accent-color: var(--es-gold);
+}
+.day-num-badge {
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: var(--es-gold); min-width: 54px;
+}
+.saham-badge {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--es-gold-soft); color: var(--es-gold);
+  border: 0.5px solid var(--es-gold-mid);
+  padding: 2px 8px; border-radius: 5px;
+}
+
+/* ── Progress bar ── */
+.progress-wrap {
+  padding: 0.75rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.progress-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin-bottom: 6px;
+}
+.prog-track {
+  height: 5px; background: var(--surface3);
+  border-radius: 3px; overflow: hidden;
+}
+.prog-fill {
+  height: 100%; border-radius: 3px;
+  background: var(--es-gold); transition: width .3s;
+}
+
+/* ── Platform bar ── */
+.platform-bar {
+  padding: 0.65rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+}
+.platform-bar .bar-label { font-size: 11px; color: var(--hint); margin-right: 3px; }
+
+/* ── Calendar layout ── */
+.calendar-layout {
+  display: grid;
+  grid-template-columns: 1fr 290px;
+  min-height: 500px;
+}
+@media (max-width: 700px) {
+  .calendar-layout { grid-template-columns: 1fr; }
+}
+.cal-pane { border-right: 0.5px solid var(--border); }
+.cal-header {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 0.5px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.cal-header h2 { font-size: 13px; font-weight: 500; }
+.cal-header span { font-size: 11px; color: var(--muted); }
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px; background: var(--border);
+}
+@media (max-width: 600px) {
+  .cal-grid { grid-template-columns: repeat(5, 1fr); }
+}
+.day-cell {
+  background: var(--surface);
+  padding: 7px 7px;
+  cursor: pointer;
+  transition: background .1s;
+  min-height: 68px;
+}
+.day-cell:hover { background: var(--surface2); }
+.day-cell.active { background: var(--es-gold-soft) !important; }
+.day-cell.active .dc-num { color: var(--es-gold); }
+.dc-num { font-size: 10px; font-family: var(--mono); font-weight: 500; color: var(--hint); margin-bottom: 3px; }
+.dc-stock { font-size: 11px; font-weight: 500; margin-bottom: 4px; }
+.dc-dots { display: flex; gap: 3px; }
+.dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  transition: opacity .2s;
+}
+.dot.hook { background: var(--hook); }
+.dot.value { background: var(--value); }
+.dot.trust { background: var(--trust); }
+.dot.closing { background: var(--closing); }
+.dc-count { font-size: 9px; font-family: var(--mono); color: var(--trust); margin-top: 2px; }
+
+/* Detail pane */
+.det-pane {}
+.det-header {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.det-header h2 { font-size: 13px; font-weight: 500; }
+.det-header p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.det-post {
+  padding: 0.9rem 1.1rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.det-post-top {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
+}
+.det-time { font-family: var(--mono); font-size: 10px; color: var(--hint); }
+.det-copy { font-size: 11px; color: var(--muted); line-height: 1.55; margin-bottom: 8px; }
+.det-actions { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── KPI section ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border-bottom: 0.5px solid var(--border);
+}
+@media (max-width: 600px) {
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+}
+.kpi-card {
+  background: var(--surface2);
+  padding: 1rem 1.1rem;
+}
+.kc-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+.kc-target { font-size: 10px; font-family: var(--mono); color: var(--hint); margin-bottom: 4px; }
+.kc-input {
+  font-family: var(--mono); font-size: 20px; font-weight: 500;
+  background: transparent; border: none;
+  border-bottom: 1.5px solid var(--border);
+  color: var(--text); width: 100%; outline: none; padding: 2px 0;
+  transition: border-color .15s;
+}
+.kc-input:focus { border-color: var(--es-gold); }
+.kc-unit { font-size: 10px; color: var(--hint); margin-top: 3px; }
+
+.sec-title {
+  font-size: 12px; font-weight: 500;
+  padding: 0.85rem 1.5rem 0.6rem;
+  border-bottom: 0.5px solid var(--border);
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+.target-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1px; background: var(--border);
+}
+@media (max-width: 500px) {
+  .target-grid { grid-template-columns: 1fr; }
+}
+.target-card {
+  background: var(--surface);
+  padding: 1rem 1.1rem;
+}
+.tc-level { font-size: 11px; font-weight: 500; margin-bottom: 6px; }
+.tc-level.r { color: var(--trust); }
+.tc-level.t { color: var(--value); }
+.tc-level.a { color: var(--hook); }
+.tc-body { font-size: 11px; color: var(--muted); line-height: 1.8; }
+
+.week-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.week-table th {
+  font-weight: 500; font-size: 10px; color: var(--muted);
+  text-align: left; padding: 7px 10px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--surface2);
+}
+.week-table td {
+  padding: 7px 10px;
+  border-bottom: 0.5px solid var(--border);
+}
+.week-table td input {
+  font-family: var(--mono); font-size: 11px;
+  background: transparent; border: none;
+  border-bottom: 1px solid transparent;
+  width: 100%; color: var(--text); outline: none;
+  transition: border-color .15s;
+}
+.week-table td input:focus { border-color: var(--es-gold); }
+.week-table tr:hover td { background: var(--surface2); }
+
+/* ── Template section ── */
+.tmpl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border);
+}
+@media (max-width: 600px) {
+  .tmpl-grid { grid-template-columns: 1fr; }
+}
+.tmpl-card { background: var(--surface); padding: 1.1rem 1.25rem; }
+.tmpl-card h3 {
+  font-size: 12px; font-weight: 500;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.tmpl-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tmpl-card textarea {
+  width: 100%; font-family: var(--mono); font-size: 11px; line-height: 1.7;
+  border: 0.5px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; background: var(--surface2); color: var(--text);
+  resize: vertical; outline: none; min-height: 76px;
+  transition: border-color .15s;
+}
+.tmpl-card textarea:focus { border-color: var(--es-gold); }
+.tmpl-sub { font-size: 10px; color: var(--hint); margin: 5px 0 4px; }
+
+/* ── Google Sheets ── */
+.gs-section { padding: 1.25rem 1.5rem; }
+.gs-section h2 { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+.gs-section p { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+.gs-steps {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;
+}
+.gs-step {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--muted);
+  padding: 5px 10px; border-radius: 6px;
+  background: var(--surface2); border: 0.5px solid var(--border);
+}
+.gs-step .sn {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--es-gold); color: #1a1500;
+  font-size: 10px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.gs-code-wrap {
+  position: relative; margin-bottom: 12px;
+}
+.gs-code {
+  font-family: var(--mono); font-size: 10px; line-height: 1.7;
+  background: var(--surface2); border: 0.5px solid var(--border);
+  border-radius: 8px; padding: 1rem;
+  white-space: pre-wrap; word-break: break-all;
+  max-height: 260px; overflow-y: auto;
+  color: var(--muted);
+}
+.copy-code-btn {
+  position: absolute; top: 8px; right: 8px;
+  font-family: var(--font); font-size: 10px;
+  padding: 4px 10px; border-radius: 5px;
+  border: 0.5px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .12s;
+}
+.copy-code-btn:hover { background: var(--es-gold); color: #1a1500; border-color: var(--es-gold); }
+.gs-links { display: flex; gap: 6px; flex-wrap: wrap; }
+.gs-links a {
+  font-family: var(--font); font-size: 11px; font-weight: 500;
+  padding: 5px 12px; border-radius: 6px;
+  border: 0.5px solid var(--border);
+  background: transparent; color: var(--muted);
+  text-decoration: none; transition: all .12s;
+}
+.gs-links a:hover { background: var(--surface2); color: var(--text); }
+.gs-links a.primary { background: var(--es-gold-soft); color: var(--es-gold); border-color: var(--es-gold-mid); }
+.gs-links a.primary:hover { background: var(--es-gold); color: #1a1500; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--text); color: var(--surface);
+  font-size: 12px; padding: 8px 16px; border-radius: 6px;
+  opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ── Header ── -->
+  <header class="es-header">
+    <div class="es-logo">ES</div>
+    <div class="es-header-text">
+      <h1>EconomStock — Dashboard Konten</h1>
+      <p>30 Hari · Hook → Value → Trust → Closing</p>
+    </div>
+    <div class="tab-bar">
+      <button class="tab active" onclick="showTab('today',this)">Hari Ini</button>
+      <button class="tab" onclick="showTab('calendar',this)">Kalender</button>
+      <button class="tab" onclick="showTab('kpi',this)">KPI</button>
+      <button class="tab" onclick="showTab('templates',this)">Template</button>
+      <button class="tab" onclick="showTab('sheets',this)">Google Sheets</button>
+    </div>
+  </header>
+
+  <!-- ======================== TAB: HARI INI ======================== -->
+  <div class="section visible" id="tab-today">
+
+    <!-- Flow strip -->
+    <div class="flow-strip">
+      <div class="flow-node fn-hook">
+        <div class="fn-time">08.00</div>
+        <div class="fn-box"><div class="fn-name">Radar</div><div class="fn-sub">Hook</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-value">
+        <div class="fn-time">12.00</div>
+        <div class="fn-box"><div class="fn-name">Kalkulator</div><div class="fn-sub">Value</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-trust">
+        <div class="fn-time">16.00</div>
+        <div class="fn-box"><div class="fn-name">Insight / Data 1%</div><div class="fn-sub">Trust</div></div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node fn-closing">
+        <div class="fn-time">20.00</div>
+        <div class="fn-box"><div class="fn-name">Dashboard</div><div class="fn-sub">Closing</div></div>
+      </div>
+    </div>
+
+    <!-- Day selector -->
+    <div class="day-selector">
+      <label>Pilih hari:</label>
+      <input type="range" id="day-slider" min="1" max="30" value="1" oninput="selectDay(this.value)">
+      <span class="day-num-badge" id="day-label">Hari 1</span>
+      <span class="saham-badge" id="day-saham-badge">BBCA</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Progress keseluruhan 30 hari</span>
+        <span id="prog-count" style="font-family:var(--mono)">0 / 120</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="overall-prog" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- 4 slot cards -->
+    <div class="today-grid" id="today-slots"></div>
+
+    <!-- Platform bar -->
+    <div class="platform-bar">
+      <span class="bar-label">Post ke:</span>
+      <a class="pi-btn plat" href="https://stockbit.com" target="_blank">📈 Stockbit</a>
+      <a class="pi-btn plat" href="https://threads.net" target="_blank">🧵 Threads</a>
+      <a class="pi-btn plat" href="https://tiktok.com" target="_blank">🎵 TikTok</a>
+      <a class="pi-btn plat" href="https://instagram.com" target="_blank">📸 Instagram</a>
+      <a class="pi-btn plat" href="https://linkedin.com" target="_blank">💼 LinkedIn</a>
+      <span class="bar-label" style="margin-left:10px">Buat teks AI:</span>
+      <a class="pi-btn ai" href="https://gemini.google.com" target="_blank">✨ Gemini</a>
+      <a class="pi-btn ai" href="https://chatgpt.com" target="_blank">🤖 ChatGPT</a>
+      <a class="pi-btn ai" href="https://claude.ai" target="_blank">🔮 Claude</a>
+    </div>
+
+  </div>
+
+  <!-- ======================== TAB: KALENDER ======================== -->
+  <div class="section" id="tab-calendar">
+    <div class="calendar-layout">
+      <div class="cal-pane">
+        <div class="cal-header">
+          <h2>Kalender 30 Hari</h2>
+          <span>120 konten total</span>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="det-pane">
+        <div class="det-header">
+          <h2 id="det-title">Pilih hari</h2>
+          <p id="det-sub">Klik sel untuk lihat detail konten</p>
+        </div>
+        <div id="det-posts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== TAB: KPI ======================== -->
+  <div class="section" id="tab-kpi">
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kc-label">Traffic ke website</div>
+        <div class="kc-target">Realistis: 20K · Agresif: 50K+</div>
+        <input class="kc-input" id="kpi-traffic" type="text" placeholder="8.000" oninput="saveKPI()">
+        <div class="kc-unit">pengunjung / bulan</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kc-label">Followers baru</div>
+        <div class="kc-target">Realistis: +500–1K · Agresif: +5K</div>
+        <input class="kc-input" id="kpi-followers" type="text" placeholder="0" oninput="saveKPI()">
+        <div class="kc-unit">akun baru</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kc-label">Transaksi penjualan</div>
+        <div class="kc-target">Realistis: 20–40 · Agresif: 150–300</div>
+        <input class="kc-input" id="kpi-tx" type="text" placeholder="0" oninput="saveKPI()">
+        <div class="kc-unit">transaksi</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kc-label">CTR ke website</div>
+        <div class="kc-target">Min 1% · Bagus 2–5%</div>
+        <input class="kc-input" id="kpi-ctr" type="text" placeholder="0%" oninput="saveKPI()">
+        <div class="kc-unit">click-through rate</div>
+      </div>
+    </div>
+
+    <div class="sec-title">Evaluasi Mingguan</div>
+    <div style="overflow-x:auto">
+      <table class="week-table">
+        <thead>
+          <tr>
+            <th style="min-width:160px">KPI</th>
+            <th>Minggu 1 (Hr 1–7)</th>
+            <th>Minggu 2 (Hr 8–14)</th>
+            <th>Minggu 3 (Hr 15–21)</th>
+            <th>Minggu 4 (Hr 22–30)</th>
+          </tr>
+        </thead>
+        <tbody id="week-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="sec-title">Target per Level</div>
+    <div class="target-grid">
+      <div class="target-card">
+        <div class="tc-level r">REALISTIS (baseline aman)</div>
+        <div class="tc-body">Traffic 8K → 20K<br>Followers +500–1.000<br>Transaksi 20–40<br>Conversion 0.2–0.5%<br>CTR minimal 1%</div>
+      </div>
+      <div class="target-card" style="border-left:0.5px solid var(--border)">
+        <div class="tc-level t">TENGAH (growth mode)</div>
+        <div class="tc-body">Traffic 8K → 30K<br>Followers +1.000–2.500<br>Transaksi 50–100<br>Conversion 0.5–1%<br>CTR 2–3%</div>
+      </div>
+      <div class="target-card" style="border-left:0.5px solid var(--border)">
+        <div class="tc-level a">AGRESIF (push mode)</div>
+        <div class="tc-body">Traffic 8K → 50K+<br>Followers +3.000–5.000<br>Transaksi 150–300<br>Conversion 1–2%<br>CTR 4–5%</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ======================== TAB: TEMPLATE ======================== -->
+  <div class="section" id="tab-templates">
+    <div class="tmpl-grid" id="tmpl-grid"></div>
+  </div>
+
+  <!-- ======================== TAB: GOOGLE SHEETS ======================== -->
+  <div class="section" id="tab-sheets">
+    <div class="gs-section">
+      <h2>Google Sheets — Setup Otomatis</h2>
+      <p>Salin kode di bawah → buka Google Sheets → menu <strong>Extensions → Apps Script</strong> → paste seluruh kode → klik <strong>Run → setup()</strong>. Semua 120 baris konten, KPI tracker, dan template copywriting langsung muncul siap dipakai.</p>
+
+      <div class="gs-steps">
+        <div class="gs-step"><span class="sn">1</span>Buka Google Sheets baru</div>
+        <div class="gs-step"><span class="sn">2</span>Extensions → Apps Script</div>
+        <div class="gs-step"><span class="sn">3</span>Paste kode di bawah</div>
+        <div class="gs-step"><span class="sn">4</span>Klik Run → setup()</div>
+        <div class="gs-step"><span class="sn">5</span>Izinkan akses → selesai!</div>
+      </div>
+
+      <div class="gs-code-wrap">
+        <pre class="gs-code" id="gs-code-block"></pre>
+        <button class="copy-code-btn" onclick="copyGS(this)">Salin Kode</button>
+      </div>
+
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:500">Link cepat:</div>
+      <div class="gs-links">
+        <a href="https://sheets.google.com/create" target="_blank" class="primary">Buat Google Sheet Baru</a>
+        <a href="https://www.economstock.com/p/radar.html" target="_blank">Radar</a>
+        <a href="https://www.economstock.com/p/tools.html" target="_blank">Kalkulator Graham</a>
+        <a href="https://www.economstock.com/p/kepemilkan.html" target="_blank">Data 1% Kepemilikan</a>
+        <a href="https://www.economstock.com/search/label/Insight" target="_blank">Insight</a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Data ── */
+const DATA = [
+  {day:1,saham:'BBCA'},{day:2,saham:'BBRI'},{day:3,saham:'BMRI'},
+  {day:4,saham:'TLKM'},{day:5,saham:'ASII'},{day:6,saham:'GOTO'},
+  {day:7,saham:'BREN'},{day:8,saham:'ANTM'},{day:9,saham:'UNVR'},
+  {day:10,saham:'ICBP'},{day:11,saham:'KLBF'},{day:12,saham:'PGAS'},
+  {day:13,saham:'SMGR'},{day:14,saham:'PTBA'},{day:15,saham:'AKRA'},
+  {day:16,saham:'EXCL'},{day:17,saham:'MTEL'},{day:18,saham:'CPIN'},
+  {day:19,saham:'JPFA'},{day:20,saham:'MDKA'},{day:21,saham:'ADRO'},
+  {day:22,saham:'ITMG'},{day:23,saham:'AMMN'},{day:24,saham:'INCO'},
+  {day:25,saham:'MEDC'},{day:26,saham:'SIDO'},{day:27,saham:'EMTK'},
+  {day:28,saham:'BUMI'},{day:29,saham:'INDF'},{day:30,saham:'BYAN'}
+];
+
+const SLOTS = [
+  {
+    time:'08.00', slot:'Radar', label:'Hook', cls:'hook',
+    link:'https://www.economstock.com/p/radar.html',
+    copy: s => `${s} sekarang ada di area bawah historisnya\nApakah ini peluang akumulasi atau jebakan?`
+  },
+  {
+    time:'12.00', slot:'Kalkulator', label:'Value', cls:'value',
+    link:'https://www.economstock.com/p/tools.html',
+    copy: s => `Nilai wajar ${s} masih di atas harga sekarang\nAda potensi upside yang menarik untuk diperhatikan`
+  },
+  {
+    time:'16.00', slot:'Data 1% / Insight', label:'Trust', cls:'trust',
+    link:'https://www.economstock.com/p/kepemilkan.html',
+    copy: s => `Yang jarang diperhatikan:\nKepemilikan >1% di ${s} dipegang pemain besar\nIni bukan saham 'kosong'`
+  },
+  {
+    time:'20.00', slot:'Dashboard', label:'Closing', cls:'closing',
+    link: null,
+    copy: s => `Dari pagi sampai sore kita bahas ${s}\nLihat data lengkapnya di dashboard\nArea beli, tren, target analis sudah jelas`
+  }
+];
+
+const TEMPLATES = [
+  {
+    slot:'Pagi — Radar (Hook)', cls:'hook',
+    t1:'{kode} sekarang ada di {persentil}% terbawah\nBiasanya kondisi seperti ini mulai fase {zona}',
+    t2:'{kode} jarang ada di posisi ini\nMasuk area bawah historis — peluang atau jebakan?'
+  },
+  {
+    slot:'Siang — Kalkulator (Value)', cls:'value',
+    t1:'Nilai wajar {kode} ada di Rp {nilai}\nHarga sekarang masih di bawah itu',
+    t2:'Secara valuasi, {kode} masih ada potensi sekitar {upside}%\nMenarik untuk diperhatikan'
+  },
+  {
+    slot:'Sore — Data 1% / Insight (Trust)', cls:'trust',
+    t1:'Yang jarang diperhatikan\nKepemilikan >1% di {kode} dipegang pemain besar\nIni bukan saham \'kosong\'',
+    t2:'Banyak orang fokus harga\nPadahal yang lebih penting: posisi dan siapa yang pegang {kode}'
+  },
+  {
+    slot:'Malam — Dashboard (Closing)', cls:'closing',
+    t1:'Dari pagi kita bahas {kode}\nSekarang lihat datanya lengkap di dashboard\nArea beli, tren, target analis sudah jelas',
+    t2:'Ini bukan soal feeling\nSemua datanya sudah ada\nPertanyaannya: kamu sudah pakai atau belum?'
+  }
+];
+
+const WEEK_KPIS = [
+  'Traffic unik ke web','Followers baru','Transaksi masuk',
+  'CTR (%)','Penggunaan Radar','Penggunaan Kalkulator',
+  'Conversion rate (%)','Konten terbaik (save)'
+];
+
+/* ── State (localStorage) ── */
+function loadState(key, def) {
+  try { return JSON.parse(localStorage.getItem(key) || 'null') || def; } catch(e) { return def; }
+}
+function saveState(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+let status  = loadState('es_status', {});
+let kpiData = loadState('es_kpi', {});
+let weekData= loadState('es_week', {});
+let selectedDay = 1;
+
+/* ── Toast ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ── Tab switching ── */
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.getElementById('tab-' + id).classList.add('visible');
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (id === 'calendar') renderCalGrid();
+}
+
+/* ── Day selection ── */
+function selectDay(d) {
+  selectedDay = parseInt(d);
+  document.getElementById('day-label').textContent = 'Hari ' + d;
+  const row = DATA[d - 1];
+  document.getElementById('day-saham-badge').textContent = row ? row.saham : '';
+  document.getElementById('day-slider').value = d;
+  renderTodaySlots(d);
+  updateProgress();
+}
+
+/* ── Today slots ── */
+function renderTodaySlots(d) {
+  const row = DATA[d - 1];
+  if (!row) return;
+  const wrap = document.getElementById('today-slots');
+  wrap.innerHTML = SLOTS.map((sl, i) => {
+    const key = d + '_' + i;
+    const done = !!status[key];
+    const copyText = sl.copy(row.saham).replace(/\n/g, '<br>');
+    return `<div class="slot-card">
+      <div class="slot-accent ${sl.cls}"></div>
+      <div class="slot-time">${sl.time} WIB</div>
+      <div class="slot-label ${sl.cls}">${sl.label}</div>
+      <div class="stock-pill">✦ ${row.saham}</div>
+      <h3>${sl.slot}</h3>
+      <div class="slot-copy">${copyText}</div>
+      <div class="btn-row">
+        ${sl.link
+          ? `<a class="pi-btn tool" href="${sl.link}" target="_blank">Buka Tool →</a>`
+          : `<span class="pi-btn tool" style="opacity:.5;cursor:default">Buka Excel</span>`}
+        <button class="pi-btn" onclick="copySlotText(${i},${d-1})">Salin Teks</button>
+        <button class="status-btn ${done ? 'done' : ''}" id="sb_${key}" onclick="toggleDone('${key}')">
+          ${done ? '✓ Selesai' : 'Tandai Selesai'}
+        </button>
+      </div>
+      <div class="btn-row" style="margin-top:3px">
+        <a class="pi-btn plat" href="https://stockbit.com" target="_blank">📈 Stockbit</a>
+        <a class="pi-btn plat" href="https://threads.net" target="_blank">🧵 Threads</a>
+        <a class="pi-btn plat" href="https://tiktok.com" target="_blank">🎵 TikTok</a>
+        <a class="pi-btn plat" href="https://instagram.com" target="_blank">📸 IG</a>
+        <a class="pi-btn plat" href="https://linkedin.com" target="_blank">💼 LinkedIn</a>
+      </div>
+      <div class="btn-row" style="margin-top:3px">
+        <a class="pi-btn ai" href="https://gemini.google.com" target="_blank">✨ Gemini</a>
+        <a class="pi-btn ai" href="https://chatgpt.com" target="_blank">🤖 ChatGPT</a>
+        <a class="pi-btn ai" href="https://claude.ai" target="_blank">🔮 Claude</a>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copySlotText(slotIdx, dayIdx) {
+  const text = SLOTS[slotIdx].copy(DATA[dayIdx].saham);
+  navigator.clipboard.writeText(text).then(() => toast('Teks disalin!')).catch(() => toast('Gagal salin'));
+}
+
+function toggleDone(key) {
+  status[key] = !status[key];
+  saveState('es_status', status);
+  const btn = document.getElementById('sb_' + key);
+  if (btn) {
+    btn.classList.toggle('done', !!status[key]);
+    btn.textContent = status[key] ? '✓ Selesai' : 'Tandai Selesai';
+  }
+  updateProgress();
+  renderCalGrid();
+}
+
+/* ── Progress ── */
+function updateProgress() {
+  const done = Object.values(status).filter(Boolean).length;
+  const pct = Math.round(done / 120 * 100);
+  document.getElementById('overall-prog').style.width = pct + '%';
+  document.getElementById('prog-count').textContent = done + ' / 120 (' + pct + '%)';
+}
+
+/* ── Calendar ── */
+function renderCalGrid() {
+  const grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  const clsList = ['hook','value','trust','closing'];
+  grid.innerHTML = DATA.map(row => {
+    const done = SLOTS.filter((_, i) => status[row.day + '_' + i]).length;
+    const isActive = selectedDay === row.day ? ' active' : '';
+    return `<div class="day-cell${isActive}" onclick="calSelect(${row.day})">
+      <div class="dc-num">D${row.day}</div>
+      <div class="dc-stock">${row.saham}</div>
+      <div class="dc-dots">
+        ${clsList.map((c, i) => `<div class="dot ${c}" style="opacity:${status[row.day+'_'+i]?'1':'0.2'}"></div>`).join('')}
+      </div>
+      ${done > 0 ? `<div class="dc-count">${done}/4</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function calSelect(d) {
+  selectedDay = d;
+  renderCalGrid();
+  const row = DATA[d - 1];
+  document.getElementById('det-title').textContent = 'Hari ' + d + ' — ' + row.saham;
+  document.getElementById('det-sub').textContent = '4 slot konten';
+  const posts = document.getElementById('det-posts');
+  posts.innerHTML = SLOTS.map((sl, i) => {
+    const key = d + '_' + i;
+    const done = !!status[key];
+    return `<div class="det-post">
+      <div class="det-post-top">
+        <span class="det-time">${sl.time}</span>
+        <span class="slot-label ${sl.cls}" style="font-size:10px;padding:1px 6px">${sl.label}</span>
+        <button class="status-btn ${done?'done':''}" style="margin-left:auto;font-size:10px" 
+          id="dsb_${key}" onclick="toggleDone2('${key}')">
+          ${done ? '✓' : 'Tandai'}
+        </button>
+      </div>
+      <div class="det-copy">${sl.copy(row.saham).replace(/\n/g,'<br>')}</div>
+      <div class="det-actions">
+        <div class="btn-row">
+          ${sl.link ? `<a class="pi-btn tool" href="${sl.link}" target="_blank">Buka Tool →</a>` : '<span class="pi-btn tool" style="opacity:.5;cursor:default">Buka Excel</span>'}
+          <a class="pi-btn plat" href="https://stockbit.com" target="_blank">Stockbit</a>
+          <a class="pi-btn plat" href="https://threads.net" target="_blank">Threads</a>
+          <a class="pi-btn plat" href="https://tiktok.com" target="_blank">TikTok</a>
+          <a class="pi-btn plat" href="https://instagram.com" target="_blank">IG</a>
+          <a class="pi-btn plat" href="https://linkedin.com" target="_blank">LinkedIn</a>
+        </div>
+        <div class="btn-row">
+          <a class="pi-btn ai" href="https://gemini.google.com" target="_blank">✨ Gemini</a>
+          <a class="pi-btn ai" href="https://chatgpt.com" target="_blank">🤖 ChatGPT</a>
+          <a class="pi-btn ai" href="https://claude.ai" target="_blank">🔮 Claude</a>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDone2(key) {
+  status[key] = !status[key];
+  saveState('es_status', status);
+  ['sb_','dsb_'].forEach(prefix => {
+    const btn = document.getElementById(prefix + key);
+    if (btn) {
+      btn.classList.toggle('done', !!status[key]);
+      btn.textContent = status[key]
+        ? (prefix === 'sb_' ? '✓ Selesai' : '✓')
+        : (prefix === 'sb_' ? 'Tandai Selesai' : 'Tandai');
+    }
+  });
+  updateProgress();
+  renderCalGrid();
+}
+
+/* ── KPI ── */
+function saveKPI() {
+  ['traffic','followers','tx','ctr'].forEach(k => {
+    const el = document.getElementById('kpi-' + k);
+    if (el) kpiData[k] = el.value;
+  });
+  saveState('es_kpi', kpiData);
+}
+
+function loadKPI() {
+  ['traffic','followers','tx','ctr'].forEach(k => {
+    const el = document.getElementById('kpi-' + k);
+    if (el && kpiData[k]) el.value = kpiData[k];
+  });
+}
+
+function renderWeekTable() {
+  const tb = document.getElementById('week-tbody');
+  if (!tb) return;
+  tb.innerHTML = WEEK_KPIS.map(kpi => `<tr>
+    <td style="font-weight:500;white-space:nowrap">${kpi}</td>
+    ${[0,1,2,3].map(wi => `<td>
+      <input type="text"
+        value="${weekData[kpi+'_'+wi] || ''}"
+        placeholder="—"
+        oninput="weekData['${kpi}_${wi}']=this.value;saveState('es_week',weekData)">
+    </td>`).join('')}
+  </tr>`).join('');
+}
+
+/* ── Templates ── */
+function renderTemplates() {
+  const g = document.getElementById('tmpl-grid');
+  if (!g) return;
+  const colors = {hook:'var(--hook)',value:'var(--value)',trust:'var(--trust)',closing:'var(--closing)'};
+  g.innerHTML = TEMPLATES.map(t => `<div class="tmpl-card">
+    <h3>
+      <span class="tmpl-dot" style="background:${colors[t.cls]}"></span>
+      ${t.slot}
+    </h3>
+    <div class="tmpl-sub">Opsi 1:</div>
+    <textarea oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${t.t1}</textarea>
+    <div class="tmpl-sub">Opsi 2:</div>
+    <textarea oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${t.t2}</textarea>
+  </div>`).join('');
+}
+
+/* ── Google Sheets code ── */
+const GS_CODE = `function setup() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // ── Sheet 1: KONTEN 30 HARI ──
+  var sh = ss.getSheetByName('KONTEN 30 HARI') || ss.insertSheet('KONTEN 30 HARI');
+  sh.clearContents();
+  var rows = [['HARI','SAHAM','WAKTU','SLOT','LABEL','COPYWRITING','LINK TOOL','STATUS','CATATAN']];
+  var days = [
+    [1,'BBCA'],[2,'BBRI'],[3,'BMRI'],[4,'TLKM'],[5,'ASII'],
+    [6,'GOTO'],[7,'BREN'],[8,'ANTM'],[9,'UNVR'],[10,'ICBP'],
+    [11,'KLBF'],[12,'PGAS'],[13,'SMGR'],[14,'PTBA'],[15,'AKRA'],
+    [16,'EXCL'],[17,'MTEL'],[18,'CPIN'],[19,'JPFA'],[20,'MDKA'],
+    [21,'ADRO'],[22,'ITMG'],[23,'AMMN'],[24,'INCO'],[25,'MEDC'],
+    [26,'SIDO'],[27,'EMTK'],[28,'BUMI'],[29,'INDF'],[30,'BYAN']
+  ];
+  var slots = [
+    ['08.00','Radar','Hook','https://www.economstock.com/p/radar.html'],
+    ['12.00','Kalkulator','Value','https://www.economstock.com/p/tools.html'],
+    ['16.00','Data 1% / Insight','Trust','https://www.economstock.com/p/kepemilkan.html'],
+    ['20.00','Dashboard','Closing','Buka Excel']
+  ];
+  var copies = [
+    function(s){return s+' sekarang ada di area bawah historisnya. Apakah ini peluang akumulasi atau jebakan?';},
+    function(s){return 'Nilai wajar '+s+' masih di atas harga sekarang. Ada potensi upside yang menarik.';},
+    function(s){return 'Yang jarang diperhatikan: Kepemilikan >1% di '+s+' dipegang pemain besar. Ini bukan saham kosong.';},
+    function(s){return 'Dari pagi sampai sore kita bahas '+s+'. Lihat data lengkapnya di dashboard.'}
+  ];
+  days.forEach(function(d) {
+    slots.forEach(function(sl, i) {
+      rows.push([d[0], d[1], sl[0], sl[1], sl[2], copies[i](d[1]), sl[3], 'Belum', '']);
+    });
+  });
+  sh.getRange(1,1,rows.length,9).setValues(rows);
+  var hdr = sh.getRange(1,1,1,9);
+  hdr.setFontWeight('bold').setBackground('#C9A84C').setFontColor('#1a1500');
+  sh.setFrozenRows(1);
+  sh.setColumnWidth(6,300); sh.setColumnWidth(7,220); sh.setColumnWidth(9,200);
+
+  // ── Sheet 2: KPI TRACKER ──
+  var kh = ss.getSheetByName('KPI TRACKER') || ss.insertSheet('KPI TRACKER');
+  kh.clearContents();
+  var kpiRows = [
+    ['KPI','MINGGU 1 (Hr 1-7)','MINGGU 2 (Hr 8-14)','MINGGU 3 (Hr 15-21)','MINGGU 4 (Hr 22-30)','TARGET'],
+    ['Traffic unik ke web','','','','','20.000'],
+    ['Followers baru','','','','','+1.000'],
+    ['Transaksi masuk','','','','','50'],
+    ['CTR (%)','','','','','2%'],
+    ['Penggunaan Radar','','','','','25+/hr'],
+    ['Penggunaan Kalkulator','','','','','25+/hr'],
+    ['Conversion rate (%)','','','','','0.5%'],
+    ['Konten terbaik (save)','','','','','-']
+  ];
+  kh.getRange(1,1,kpiRows.length,6).setValues(kpiRows);
+  kh.getRange(1,1,1,6).setFontWeight('bold').setBackground('#C9A84C').setFontColor('#1a1500');
+  kh.setFrozenRows(1);
+  [2,3,4,5].forEach(function(c){kh.setColumnWidth(c,140);});
+
+  // ── Sheet 3: TEMPLATE COPY ──
+  var tc = ss.getSheetByName('TEMPLATE COPY') || ss.insertSheet('TEMPLATE COPY');
+  tc.clearContents();
+  var tmpl = [
+    ['SLOT','OPSI 1','OPSI 2'],
+    ['PAGI - RADAR (Hook)','{kode} sekarang ada di {persentil}% terbawah. Biasanya kondisi seperti ini mulai fase {zona}','{kode} jarang ada di posisi ini. Masuk area bawah historis - peluang atau jebakan?'],
+    ['SIANG - KALKULATOR (Value)','Nilai wajar {kode} ada di Rp {nilai}. Harga sekarang masih di bawah itu','Secara valuasi, {kode} masih ada potensi sekitar {upside}%. Menarik untuk diperhatikan'],
+    ['SORE - DATA 1% (Trust)','Yang jarang diperhatikan. Kepemilikan >1% di {kode} dipegang pemain besar. Ini bukan saham kosong','Banyak orang fokus harga. Padahal yang lebih penting: posisi dan siapa yang pegang {kode}'],
+    ['MALAM - DASHBOARD (Closing)','Dari pagi kita bahas {kode}. Sekarang lihat datanya lengkap di dashboard. Area beli, tren, target sudah jelas','Ini bukan soal feeling. Semua datanya sudah ada. Pertanyaannya: kamu sudah pakai atau belum?']
+  ];
+  tc.getRange(1,1,tmpl.length,3).setValues(tmpl);
+  tc.getRange(1,1,1,3).setFontWeight('bold').setBackground('#C9A84C').setFontColor('#1a1500');
+  tc.setFrozenRows(1);
+  [2,3].forEach(function(c){tc.setColumnWidth(c,380);});
+
+  SpreadsheetApp.getUi().alert('Setup selesai! 3 sheet berhasil dibuat:\\n- KONTEN 30 HARI (120 baris)\\n- KPI TRACKER\\n- TEMPLATE COPY\\n\\nSelamat eksekusi!');
+}`;
+
+function renderGSCode() {
+  const el = document.getElementById('gs-code-block');
+  if (el) el.textContent = GS_CODE;
+}
+
+function copyGS(btn) {
+  navigator.clipboard.writeText(GS_CODE)
+    .then(() => { btn.textContent = 'Tersalin ✓'; setTimeout(() => btn.textContent = 'Salin Kode', 1800); })
+    .catch(() => toast('Gagal menyalin, seleksi manual'));
+}
+
+/* ── Init ── */
+selectDay(1);
+renderCalGrid();
+renderTemplates();
+renderWeekTable();
+loadKPI();
+renderGSCode();
+updateProgress();
+</script>
+</body>
+</html>
