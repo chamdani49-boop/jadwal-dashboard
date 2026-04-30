@@ -513,6 +513,8 @@ body {
       <p>30 Hari · Hook → Value → Trust → Closing</p>
     </div>
     <div class="tab-bar">
+      <span id="sync-status" style="font-size:11px;color:var(--hint);padding:5px 8px;white-space:nowrap">⬤ Offline</span>
+      <button class="tab" onclick="syncFromGS()" style="background:var(--es-gold-soft);color:var(--es-gold);border-color:var(--es-gold-mid)">↻ Sync GS</button>
       <button class="tab active" onclick="showTab('today',this)">Hari Ini</button>
       <button class="tab" onclick="showTab('calendar',this)">Kalender</button>
       <button class="tab" onclick="showTab('kpi',this)">KPI</button>
@@ -709,7 +711,16 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-/* ── Data ── */
+// ============================================================
+//  SATU-SATUNYA BARIS YANG PERLU KAMU EDIT:
+//  Ganti teks di bawah ini dengan URL deployment Google Apps Script kamu.
+//  Cara dapat URL: Apps Script → Deploy → New Deployment → Web App → salin URL
+//  Kalau belum punya URL, biarkan saja — dashboard tetap berjalan normal.
+// ============================================================
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxFkS2r2UL58Gz-LlpEZTDss4vOcPoRBd9sQTvsbKPQYrQ0ueG4Z3z3XIxo1s4vuz30/exec';
+// ============================================================
+
+/* ── Data default (dipakai kalau GS_URL belum diisi) ── */
 const DATA = [
   {day:1,saham:'BBCA'},{day:2,saham:'BBRI'},{day:3,saham:'BMRI'},
   {day:4,saham:'TLKM'},{day:5,saham:'ASII'},{day:6,saham:'GOTO'},
@@ -1090,6 +1101,60 @@ function copyGS(btn) {
     .catch(() => toast('Gagal menyalin, seleksi manual'));
 }
 
+/* ── Sinkronisasi Google Sheets ── */
+function syncFromGS() {
+  // Kalau URL belum diisi, skip — pakai data lokal saja
+  if (!GS_URL || GS_URL === 'PASTE_URL_GAS_KAMU_DI_SINI') {
+    showSyncStatus('offline');
+    return;
+  }
+  showSyncStatus('loading');
+  fetch(GS_URL)
+    .then(r => r.json())
+    .then(json => {
+      if (!json.konten || !json.konten.length) throw new Error('Data kosong');
+      // Update status selesai dari Google Sheets
+      json.konten.forEach(row => {
+        const hari = row['HARI'];
+        const slot = row['SLOT'];
+        const selesai = (row['STATUS'] || '').toString().toLowerCase() === 'selesai';
+        const slotIdx = ['Radar','Kalkulator','Data 1% / Insight','Dashboard'].indexOf(slot);
+        if (hari && slotIdx !== -1) {
+          const key = hari + '_' + slotIdx;
+          status[key] = selesai;
+        }
+      });
+      saveState('es_status', status);
+      // Update nama saham dari GS kalau ada perubahan
+      json.konten.forEach(row => {
+        const hari = parseInt(row['HARI']);
+        const saham = row['SAHAM'];
+        if (hari >= 1 && hari <= 30 && saham) DATA[hari-1].saham = saham;
+      });
+      showSyncStatus('online');
+      selectDay(selectedDay);
+      renderCalGrid();
+      updateProgress();
+      toast('Data tersinkron dari Google Sheets ✓');
+    })
+    .catch(() => {
+      showSyncStatus('error');
+    });
+}
+
+function showSyncStatus(state) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const map = {
+    offline: ['⬤', '#9b9b94', 'Offline (data lokal)'],
+    loading: ['⬤', '#C9A84C', 'Sinkronisasi...'],
+    online:  ['⬤', '#4DB88A', 'Tersinkron GS'],
+    error:   ['⬤', '#E87040', 'Gagal konek GS']
+  };
+  const [dot, color, label] = map[state] || map.offline;
+  el.innerHTML = `<span style="color:${color};font-size:9px">${dot}</span> ${label}`;
+}
+
 /* ── Init ── */
 selectDay(1);
 renderCalGrid();
@@ -1098,6 +1163,8 @@ renderWeekTable();
 loadKPI();
 renderGSCode();
 updateProgress();
+// Coba sync otomatis saat halaman dibuka
+syncFromGS();
 </script>
 </body>
 </html>
