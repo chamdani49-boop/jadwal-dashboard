@@ -717,7 +717,7 @@ body {
 //  Cara dapat URL: Apps Script → Deploy → New Deployment → Web App → salin URL
 //  Kalau belum punya URL, biarkan saja — dashboard tetap berjalan normal.
 // ============================================================
-const GS_URL = 'https://script.google.com/macros/s/AKfycbxFkS2r2UL58Gz-LlpEZTDss4vOcPoRBd9sQTvsbKPQYrQ0ueG4Z3z3XIxo1s4vuz30/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbzoP_NiZZlMi8YBmSdNGF6u9WfxL4RGBmPXSUwUTlq7pSoYyW9wNvft-eqamb5Q4JIV/exec';
 // ============================================================
 
 /* ── Data default (dipakai kalau GS_URL belum diisi) ── */
@@ -883,6 +883,7 @@ function toggleDone(key) {
   }
   updateProgress();
   renderCalGrid();
+  kirimKeGS(key, status[key]);
 }
 
 /* ── Progress ── */
@@ -965,6 +966,23 @@ function toggleDone2(key) {
   });
   updateProgress();
   renderCalGrid();
+  kirimKeGS(key, status[key]);
+}
+
+/* ── Kirim status ke Google Sheets ── */
+function kirimKeGS(key, selesai) {
+  if (!GS_URL || GS_URL === 'PASTE_URL_GAS_KAMU_DI_SINI') return;
+  const [hari, slotIdx] = key.split('_');
+  const slotNama = ['Radar','Kalkulator','Data 1% / Insight','Dashboard'][parseInt(slotIdx)];
+  const saham = DATA[parseInt(hari)-1]?.saham || '';
+  showSyncStatus('loading');
+  fetch(GS_URL, {
+    method: 'POST',
+    body: JSON.stringify({ hari, saham, slot: slotNama, status: selesai ? 'Selesai' : 'Belum' })
+  })
+  .then(r => r.json())
+  .then(() => { showSyncStatus('online'); toast('Tersimpan ke Google Sheets ✓'); })
+  .catch(() => { showSyncStatus('error'); toast('Gagal simpan ke GS — cek koneksi'); });
 }
 
 /* ── KPI ── */
